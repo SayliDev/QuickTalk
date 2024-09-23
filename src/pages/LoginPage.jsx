@@ -36,7 +36,7 @@ const LoginPage = () => {
         formData.password
       );
       const user = userCredential.user;
-      console.log(user);
+      console.log("Utilisateur connecté :", user);
       navigate("/quicktalk");
     } catch (error) {
       const errorCode = error.code;
@@ -104,7 +104,7 @@ const LoginPage = () => {
         <AnimatePresence>
           {loading && (
             <motion.div
-              className="bg-gray-700 bg-opacity-40 z-10 absolute inset-0 flex items-center justify-center rounded-lg "
+              className="bg-gray-700 bg-opacity-40 z-10 absolute inset-0 flex items-center justify-center rounded-lg"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -172,7 +172,10 @@ const LoginPage = () => {
           </form>
           <p className="text-sm text-center">
             Pas encore de compte ?{" "}
-            <a href="#" className="text-primary hover:underline">
+            <a
+              onClick={() => navigate("/signup")}
+              className="text-primary cursor-pointer hover:underline"
+            >
               S&#39;inscrire
             </a>
           </p>
