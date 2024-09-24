@@ -19,6 +19,7 @@ const ConversationList = () => {
         {conversations.map((conv, index) => (
           <ConversationItem
             key={index}
+            index={index}
             name={conv.name}
             lastMessage={conv.lastMessage}
             initial={conv.initial}
