@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { firestore } from "../firebase/firebase";
 
 /**
@@ -32,6 +32,36 @@ export const fetchUserData = createAsyncThunk(
     }
   }
 );
+/* ------------------------------------ x ----------------------------------- */
+
+// FetchAllUsers
+/**
+ * Thunk asynchrone qui permet de récupérer les données de tous les utilisateurs
+ * de la base de données.
+ *
+ * @returns Les données de tous les utilisateurs
+ */
+export const fetchAllUsers = createAsyncThunk(
+  "user/fetchAllUsers",
+  async (_, thunkAPI) => {
+    try {
+      // On crée une référence vers la collection des utilisateurs
+      const usersCollectionRef = collection(firestore, "users");
+
+      // On lit les documents de la collection
+      const usersDocs = await getDocs(usersCollectionRef);
+
+      // On stocke les données des utilisateurs dans un tableau
+      const users = usersDocs.docs.map((userDoc) => userDoc.data());
+
+      // On renvoie le tableau des utilisateurs
+      return users;
+    } catch (error) {
+      // Si une erreur se produit, on la renvoie avec le thunk
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
 
 /* ------------------------------------ x ----------------------------------- */
 
@@ -41,8 +71,17 @@ const userSlice = createSlice({
     data: null, // Informations utilisateur
     loading: false,
     error: null,
+    userId: null,
+    recipientId: null, // Stockage du recipientId
   },
-  reducers: {},
+  reducers: {
+    setUser(state, action) {
+      state.userId = action.payload.userId;
+    },
+    setRecipient(state, action) {
+      state.recipientId = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchUserData.pending, (state) => {
@@ -56,8 +95,25 @@ const userSlice = createSlice({
       .addCase(fetchUserData.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      .addCase(fetchAllUsers.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+
+      .addCase(fetchAllUsers.fulfilled, (state, action) => {
+        state.data = action.payload;
+        state.loading = false;
+      })
+
+      .addCase(fetchAllUsers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
+
+export const { setUser, setRecipient } = userSlice.actions;
 
 export default userSlice.reducer;
