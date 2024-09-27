@@ -66,9 +66,9 @@ const ChatWindow = () => {
     return () => unsubscribe();
   }, [userId, recipientId]);
 
-  if (messages) {
-    console.log("Messages :", messages);
-  }
+  // if (messages) {
+  //   console.log("Messages :", messages);
+  // }
 
   // Effet pour scroller automatiquement à la fin des messages lorsqu'il y a un changement
   useEffect(() => {
@@ -90,6 +90,7 @@ const ChatWindow = () => {
               <ChatMessage
                 key={index}
                 text={message.text}
+                id={message.id}
                 avatar={senderProfile?.photoURL || recipientProfile?.photoURL}
                 sender={
                   senderProfile?.displayName || recipientProfile?.displayName
