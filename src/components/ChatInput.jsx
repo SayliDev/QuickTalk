@@ -8,20 +8,25 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useDispatch, useSelector } from "react-redux";
-import { auth, db, firestore } from "../firebase/firebase";
+import { auth, db, firestore, storage } from "../firebase/firebase";
 import { addToast } from "../store/toastSlice";
 import { fetchUserData } from "../store/userSlice";
 import NoCreditModal from "./NoCreditModal";
 import ToastContainer from "./Toast/ToastContainer";
+import FileUploadModal from "./FileUploadModal";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { v4 as uuidv4 } from "uuid";
 
 const ChatInput = () => {
   const [message, setMessage] = useState("");
-  const modalRef = useRef(null); // Ref pour la modal
-  // Fonction pour ouvrir la modal
+  const fileUploadModalRef = useRef(null); // Ref pour la modal de téléchargement de fichiers
+  const noCreditModalRef = useRef(null); // Ref pour la modal "Pas de crédits"
+  const [fileSelected, setFileSelected] = useState(false); // État pour suivre si un fichier a été sélectionné
   const [user] = useAuthState(auth);
   const { data: userData, error } = useSelector((state) => state.user);
-  const recipientId = useSelector((state) => state.user.recipientId); // Récupération du recipientId
+  const recipientId = useSelector((state) => state.user.recipientId);
   const dispatch = useDispatch();
+  const [selectedFile, setSelectedFile] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -29,58 +34,102 @@ const ChatInput = () => {
     }
   }, [user, dispatch]);
 
-  const openModal = () => {
-    if (modalRef.current) {
-      modalRef.current.showModal();
+  const openFileUploadModal = (e) => {
+    e.preventDefault(); // Empêche l'envoi du formulaire
+    if (fileUploadModalRef.current) {
+      fileUploadModalRef.current.showModal();
     }
   };
 
-  const sendMessage = async (e, text, senderId) => {
+  const openNoCreditModal = (e) => {
+    if (noCreditModalRef.current) {
+      noCreditModalRef.current.showModal();
+    }
+  };
+
+  const sendMessage = async (e) => {
     e.preventDefault();
+    if (message.trim() === "") {
+      console.log("Le message ne peut pas être vide.");
+      return; // Arrête l'exécution si le message est vide
+    }
     if (userData?.credits > 0) {
       try {
-        // Ajouter le message
+        let fileURL = null;
+
+        // Si un fichier est sélectionné, le télécharger sur Firebase Storage
+        if (fileSelected) {
+          const fileInput = document.getElementById("file-input");
+          const file = fileInput.files[0];
+
+          // Génère un ID unique pour le fichier
+          const fileId = uuidv4();
+
+          // Crée une référence de stockage pour le fichier avec l'ID unique
+          const storageRef = ref(storage, `uploads/${fileId}_${file.name}`);
+
+          // Télécharge le fichier
+          await uploadBytes(storageRef, file);
+
+          // Récupère l'URL du fichier
+          fileURL = await getDownloadURL(storageRef);
+        }
         await addDoc(collection(db, "messages"), {
-          senderId,
+          senderId: user.uid,
           recipientId,
-          text,
+          text: message,
+          fileUrl: fileURL, // Ajoutez l'URL du fichier ici
           timestamp: serverTimestamp(),
         });
 
-        // Décrémente les crédits
         const userDocRef = doc(firestore, "users", user.uid);
         await updateDoc(userDocRef, {
           credits: userData.credits - 1,
         });
 
-        // Force la mise à jour des données utilisateur après la décrémentation
         dispatch(fetchUserData(user.uid));
       } catch (error) {
         console.error("Erreur lors de l'envoi du message :", error);
-        dispatch(
-          addToast({
-            id: Date.now(),
-            message: error,
-            class: "error",
-          })
-        );
+        // TODO : Gestion de l'erreur utilisateur
       }
     } else {
       console.log("Vous n'avez plus de crédits.");
-      openModal();
+      openNoCreditModal();
     }
     setMessage("");
+    setFileSelected(false);
+    setSelectedFile(null);
   };
 
   return (
-    <form onSubmit={(e) => sendMessage(e, message, user.uid, "recipientId")}>
+    <form onSubmit={sendMessage}>
       <div className="flex gap-2 items-center mt-4">
-        <button className="btn btn-outline">
+        <button type="button" className="btn btn-outline">
           <i className="fas fa-smile"></i>
         </button>
-        <button className="btn btn-outline">
-          <i className="fas fa-paperclip"></i>
+        <button
+          type="button"
+          className={
+            fileSelected
+              ? "btn bg-success border border-success text-white hover:bg-success hover:border-success"
+              : "btn btn-outline"
+          }
+          onClick={openFileUploadModal}
+        >
+          <i
+            className={
+              fileSelected ? "fas fa-check text-white" : "fas fa-paperclip"
+            }
+          ></i>
         </button>
+        <FileUploadModal
+          ref={fileUploadModalRef}
+          onFileSelect={setFileSelected}
+          setSelectedFile={setSelectedFile}
+          selectedFile={selectedFile}
+        />
+        {/* Modal de téléchargement de fichiers */}
+        <NoCreditModal modalRef={noCreditModalRef} /> {/* Modal sans crédits */}
         <input
           type="text"
           placeholder="Écrire un message..."
@@ -88,10 +137,11 @@ const ChatInput = () => {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         />
-        <button className="btn btn-primary">Envoyer</button>
+        <button type="submit" className="btn btn-primary">
+          Envoyer
+        </button>
       </div>
       <ToastContainer />
-      <NoCreditModal modalRef={modalRef} />
     </form>
   );
 };

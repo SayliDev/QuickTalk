@@ -102,6 +102,7 @@ const ChatWindow = () => {
                 position={message.senderId === userId ? "end" : "start"}
                 color={message.senderId === userId ? "secondary" : "primary"}
                 delivered={message.senderId === userId ? false : true}
+                image={message.fileUrl}
               />
             );
           })}

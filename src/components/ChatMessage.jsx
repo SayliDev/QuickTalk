@@ -17,7 +17,7 @@ const ChatMessage = ({
   const dispatch = useDispatch();
 
   const handleDelete = (id) => {
-    dispatch(deleteFromMessage({ messageId: id }));
+    dispatch(deleteFromMessage({ messageId: id, imageUrl: image }));
     console.log("Message supprimé !", id);
   };
   return (
@@ -43,7 +43,14 @@ const ChatMessage = ({
           style={delivered ? { marginLeft: -32 } : {}}
         >
           {text}
-          {image && <img src={image} alt="Media" className="mt-2 rounded-md" />}
+          {image && (
+            <img
+              src={image}
+              alt="Media"
+              className="mt-2 rounded-md max-w-56 cursor-pointer"
+              onClick={() => window.open(image)}
+            />
+          )}
         </div>
         {/* Bouton Supprimer */}
         {!delivered && (

@@ -1,10 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
-import { db } from "../firebase/firebase";
+import { db, storage } from "../firebase/firebase";
+import { deleteObject, ref } from "firebase/storage";
 
 export const deleteFromMessage = createAsyncThunk(
   "message/deleteFromMessage",
-  async ({ messageId }, thunkAPI) => {
+  async ({ messageId, imageUrl }, thunkAPI) => {
     try {
       // 1. On crée une reference vers le document "messages" dans Firestore
       const messageDocRef = doc(db, `messages/${messageId}`);
@@ -12,7 +13,13 @@ export const deleteFromMessage = createAsyncThunk(
       // 2. Supprime le document de l'élément des messages
       await deleteDoc(messageDocRef);
 
-      // 3. Retourne l'ID de l'élément supprimé
+      // 3. Si une URL de l'image est fournie, on supprime l'image dans le bucket Storage
+      if (imageUrl) {
+        const storageRef = ref(storage, imageUrl);
+        await deleteObject(storageRef);
+      }
+
+      // 4. Retourne l'ID de l'élément supprimé
       return messageId;
     } catch (error) {
       console.error("Erreur lors de la suppression du message", error);
