@@ -25,9 +25,9 @@ const NoCreditModal = ({ modalRef }) => {
           </button>
         </div>
       </div>
-      <form method="dialog" className="modal-backdrop" onClick={closeModal}>
+      <div method="dialog" className="modal-backdrop" onClick={closeModal}>
         <button>Fermer</button>
-      </form>
+      </div>
     </dialog>
   );
 };
