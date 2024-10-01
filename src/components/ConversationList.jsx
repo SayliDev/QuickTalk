@@ -1,9 +1,12 @@
 import { collection, getDocs } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { firestore } from "../firebase/firebase";
 import ConversationItem from "./ConversationItem";
+import UserSearchModal from "./UserSearchModal";
 
 const ConversationList = () => {
+  const searchModalRef = useRef(null);
+
   const fetchAllUsers = async () => {
     const usersCollectionRef = collection(firestore, "users");
     const usersDocs = await getDocs(usersCollectionRef);
@@ -21,6 +24,12 @@ const ConversationList = () => {
   useEffect(() => {
     fetchAllUsers().then((users) => setUsers(users));
   }, []);
+
+  const openSearchModal = () => {
+    if (searchModalRef.current) {
+      searchModalRef.current.showModal();
+    }
+  };
   return (
     <div className="flex-grow">
       <ul className="grid gap-4">
@@ -47,9 +56,13 @@ const ConversationList = () => {
           />
         ))} */}
       </ul>
-      <button className="btn btn-primary w-full mb-2 mt-5">
+      <button
+        onClick={openSearchModal}
+        className="btn btn-primary w-full mb-2 mt-5"
+      >
         <i className="fas fa-plus"></i> Nouvelle Conversation
       </button>
+      <UserSearchModal searchModalRef={searchModalRef} />
     </div>
   );
 };

@@ -86,13 +86,20 @@ const FileUploadModal = forwardRef(
             </button>
           </div>
         </div>
-        <div method="dialog" className="modal-backdrop">
+        <form method="dialog" className="modal-backdrop">
           <button>Fermer</button>
-        </div>
+        </form>
       </dialog>
     );
   }
 );
+
+// ! A enlever en prod :
+console.error = (message, ...args) => {
+  if (!message.includes("validateDOMNesting")) {
+    console.error(message, ...args);
+  }
+};
 
 FileUploadModal.displayName = "FileUploadModal";
 
