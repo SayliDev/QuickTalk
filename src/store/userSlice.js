@@ -1,5 +1,12 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
+import {
+  arrayUnion,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  updateDoc,
+} from "firebase/firestore";
 import { firestore } from "../firebase/firebase";
 
 /**
@@ -45,19 +52,18 @@ export const fetchAllUsers = createAsyncThunk(
   "user/fetchAllUsers",
   async (_, thunkAPI) => {
     try {
-      // On crée une référence vers la collection des utilisateurs
       const usersCollectionRef = collection(firestore, "users");
-
-      // On lit les documents de la collection
       const usersDocs = await getDocs(usersCollectionRef);
 
-      // On stocke les données des utilisateurs dans un tableau
-      const users = usersDocs.docs.map((userDoc) => userDoc.data());
+      // Assure que chaque utilisateur est stocké avec son id
+      const users = usersDocs.docs.map((userDoc) => ({
+        id: userDoc.id,
+        ...userDoc.data(),
+      }));
 
-      // On renvoie le tableau des utilisateurs
+      console.log("Utilisateurs récupérés dans fetchAllUsers:", users); // Ajoute ce log pour déboguer
       return users;
     } catch (error) {
-      // Si une erreur se produit, on la renvoie avec le thunk
       return thunkAPI.rejectWithValue(error.message);
     }
   }
@@ -65,14 +71,30 @@ export const fetchAllUsers = createAsyncThunk(
 
 /* ------------------------------------ x ----------------------------------- */
 
+export const sendRequest = createAsyncThunk(
+  "user/sendRequest",
+  async ({ userId, recipientId }, thunkAPI) => {
+    try {
+      const userDocRef = doc(firestore, "users", userId);
+      await updateDoc(userDocRef, {
+        pendingRequests: arrayUnion(recipientId),
+      });
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+/* ------------------------------------ x ----------------------------------- */
+
 const userSlice = createSlice({
   name: "user",
   initialState: {
-    data: null, // Informations utilisateur
+    allUsers: [], // Pour stocker tous les utilisateurs
+    currentUser: null, // Pour stocker un utilisateur spécifique
     loading: false,
     error: null,
     userId: null,
-    recipientId: null, // Stockage du recipientId
+    recipientId: null,
   },
   reducers: {
     setUser(state, action) {
@@ -89,7 +111,7 @@ const userSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchUserData.fulfilled, (state, action) => {
-        state.data = action.payload;
+        state.currentUser = action.payload;
         state.loading = false;
       })
       .addCase(fetchUserData.rejected, (state, action) => {
@@ -103,11 +125,34 @@ const userSlice = createSlice({
       })
 
       .addCase(fetchAllUsers.fulfilled, (state, action) => {
-        state.data = action.payload;
+        state.allUsers = action.payload;
         state.loading = false;
       })
 
       .addCase(fetchAllUsers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      .addCase(sendRequest.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+
+      .addCase(sendRequest.fulfilled, (state, action) => {
+        state.loading = false;
+        // Met à jour l'état local pour refléter la nouvelle requête envoyée
+        const updatedUserIndex = state.allUsers.findIndex(
+          (user) => user.id === action.meta.arg.userId
+        );
+        if (updatedUserIndex !== -1) {
+          state.allUsers[updatedUserIndex].pendingRequests.push(
+            action.meta.arg.recipientId
+          );
+        }
+      })
+
+      .addCase(sendRequest.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

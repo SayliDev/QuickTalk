@@ -1,16 +1,27 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useDispatch, useSelector } from "react-redux";
-import { auth } from "../firebase/firebase";
+import { auth, db, firestore } from "../firebase/firebase";
 import { fetchUserData } from "../store/userSlice";
 import { addToast } from "../store/toastSlice";
 import ToastContainer from "./Toast/ToastContainer";
+import NotificationCenter from "./NotificationCenter";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
+import { use } from "framer-motion/client";
 
 const ProfileSection = () => {
   const [loading, setLoading] = useState(false);
   const [user] = useAuthState(auth);
-  const { data: userData, error } = useSelector((state) => state.user);
+  const NotificationModalRef = useRef(null);
+  const { currentUser: userData, error } = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -29,6 +40,19 @@ const ProfileSection = () => {
     );
   }
 
+  const openNotificationModal = () => {
+    if (NotificationModalRef.current) {
+      NotificationModalRef.current.showModal();
+    }
+  };
+
+  // const userPendingRequests = dispatch(fetchUserData(userData.pendingRequests));
+
+  // console.log(userPendingRequests);
+
+  /* -------------------------------------------------------------------------- */
+  /*                                  return (                                  */
+  /* -------------------------------------------------------------------------- */
   return (
     <div className="mt-4">
       <motion.div
@@ -57,7 +81,10 @@ const ProfileSection = () => {
                   <span>{userData.credits} crédits</span>
                 </div>
               </div>
-              <button className="btn btn-ghost btn-circle">
+              <button
+                onClick={openNotificationModal}
+                className="btn btn-ghost btn-circle"
+              >
                 <div className="indicator">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -94,6 +121,7 @@ const ProfileSection = () => {
       <button className="btn btn-outline w-full">
         <i className="fas fa-cog"></i> Paramètres
       </button>
+      <NotificationCenter NotificationModalRef={NotificationModalRef} />
       <ToastContainer />
     </div>
   );
