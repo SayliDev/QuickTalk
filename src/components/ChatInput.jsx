@@ -23,7 +23,7 @@ const ChatInput = () => {
   const noCreditModalRef = useRef(null); // Ref pour la modal "Pas de crédits"
   const [fileSelected, setFileSelected] = useState(false); // État pour suivre si un fichier a été sélectionné
   const [user] = useAuthState(auth);
-  const { data: userData, error } = useSelector((state) => state.user);
+  const { currentUser: userData, error } = useSelector((state) => state.user);
   const recipientId = useSelector((state) => state.user.recipientId);
   const dispatch = useDispatch();
   const [selectedFile, setSelectedFile] = useState(null);
@@ -93,7 +93,7 @@ const ChatInput = () => {
         // TODO : Gestion de l'erreur utilisateur
       }
     } else {
-      console.log("Vous n'avez plus de crédits.");
+      console.log("Vous n'avez plus de crédits.", userData?.credits);
       openNoCreditModal();
     }
     setMessage("");
