@@ -32,11 +32,11 @@ const ConversationItem = ({
     >
       <div className={`avatar ${online ? "online" : ""} placeholder mr-3`}>
         <div className="bg-neutral text-neutral-content w-12 rounded-full">
-          <span className="text-xl">{initial}</span>
+          <img className="w-12" src={photoURL} alt={name || "Avatar"} />
         </div>
       </div>
       <div>
-        <a href="#" className="font-semibold">{`Chat avec ${name}`}</a>
+        <a href="#" className="font-semibold">{`${name}`}</a>
         <div className="text-sm text-gray-500">
           Dernier message: {lastMessage || "Aucun message"}
         </div>

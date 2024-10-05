@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAllUsers, sendRequest } from "../store/userSlice";
+import { fetchAllUsers, fetchUserData, sendRequest } from "../store/userSlice";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebase/firebase";
@@ -10,6 +10,14 @@ const UserSearchModal = ({ searchModalRef }) => {
   const dispatch = useDispatch();
   const [user] = useAuthState(auth);
   const userUid = user?.uid;
+
+  const { currentUser: userData, error } = useSelector((state) => state.user);
+
+  useEffect(() => {
+    if (user) {
+      dispatch(fetchUserData(user.uid));
+    }
+  }, [user, dispatch]);
 
   useEffect(() => {
     dispatch(fetchAllUsers());
@@ -75,17 +83,24 @@ const UserSearchModal = ({ searchModalRef }) => {
                           ? "btn-warning btn-sm cursor-not-allowed"
                           : ""
                       }`}
-                      disabled={user.pendingRequests.includes(userUid)}
+                      disabled={
+                        user.pendingRequests.includes(userUid) ||
+                        userData?.friends.includes(user.id)
+                      }
                     >
                       <i
                         className={`fas  ${
                           user.pendingRequests.includes(userUid)
                             ? "fa-clock"
+                            : userData?.friends.includes(user.id)
+                            ? "fa-check"
                             : "fa-user-plus"
                         }`}
                       />
                       {user.pendingRequests.includes(userUid)
                         ? "En attente"
+                        : userData?.friends.includes(user.id)
+                        ? "Amis"
                         : "Ajouter"}
                     </button>
                   </li>
