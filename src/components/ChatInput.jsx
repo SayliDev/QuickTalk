@@ -16,6 +16,7 @@ import ToastContainer from "./Toast/ToastContainer";
 import FileUploadModal from "./FileUploadModal";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
+import { AnimatePresence, motion } from "framer-motion";
 
 const ChatInput = () => {
   const [message, setMessage] = useState("");
@@ -102,7 +103,12 @@ const ChatInput = () => {
   };
 
   return (
-    <form onSubmit={sendMessage}>
+    <motion.form
+      initial={{ opacity: 0, y: 100 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 100 }}
+      onSubmit={sendMessage}
+    >
       <div className="flex gap-2 items-center mt-4">
         <button type="button" className="btn btn-outline">
           <i className="fas fa-smile"></i>
@@ -142,7 +148,7 @@ const ChatInput = () => {
         </button>
       </div>
       <ToastContainer />
-    </form>
+    </motion.form>
   );
 };
 

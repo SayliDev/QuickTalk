@@ -46,7 +46,7 @@ const NotificationCenter = ({ NotificationModalRef }) => {
     };
 
     fetchPendingRequestsProfiles();
-    console.log("Pending requests :", userData?.pendingRequests);
+    // console.log("Pending requests :", userData?.pendingRequests);
   }, [userData]);
 
   /* ---------------- Fonction pour accepter une demande d'ami ---------------- */
@@ -165,7 +165,7 @@ const NotificationCenter = ({ NotificationModalRef }) => {
             )}
           </ul>
         </div>
-        <div className="modal-action">
+        <div className="modal-action m-0">
           <button className="btn btn-primary" onClick={closeModal}>
             Fermer
           </button>

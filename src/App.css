@@ -1,6 +1,6 @@
 .bck-chat {
-  background-color: #171b21;
+  /* background-color: #171b21; */
   opacity: 1;
-  background-image: radial-gradient(#2d2d3d 2px, #171b21 2px);
+  background-image: radial-gradient(#2d2d3d 2px, #171b2100 2px);
   background-size: 40px 40px;
 }

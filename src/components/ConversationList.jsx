@@ -1,9 +1,11 @@
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
+import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { firestore } from "../firebase/firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { useDispatch, useSelector } from "react-redux";
+import { auth, firestore } from "../firebase/firebase";
 import ConversationItem from "./ConversationItem";
 import UserSearchModal from "./UserSearchModal";
-import { useSelector } from "react-redux";
 
 const ConversationList = () => {
   const searchModalRef = useRef(null);
@@ -16,7 +18,6 @@ const ConversationList = () => {
       id: doc.id,
       ...doc.data(),
     }));
-    console.log(users);
 
     return users;
   };
@@ -56,10 +57,6 @@ const ConversationList = () => {
     console.log("Pending requests :", userData?.pendingRequests);
   }, [userData]);
 
-  if (friendsProfiles) {
-    console.log("friendsProfiles :", friendsProfiles);
-  }
-
   return (
     <div className="flex-grow">
       <ul className="grid gap-4">
@@ -70,28 +67,28 @@ const ConversationList = () => {
             name={profile.displayName}
             recipientId={profile.uid}
             photoURL={profile.photoURL}
-            lastMessage={profile.lastMessage}
+            lastMessage={"Aucun messages"}
             initial={profile.initial}
             online={profile.online || false}
           />
         ))}
-        {/* {conversations.map((conv, index) => (
-          <ConversationItem
-            key={index}
-            index={index}
-            name={conv.name}
-            lastMessage={conv.lastMessage}
-            initial={conv.initial}
-            online={conv.online || false}
-          />
-        ))} */}
       </ul>
-      <button
-        onClick={openSearchModal}
-        className="btn btn-primary w-full mb-2 mt-5"
-      >
-        <i className="fas fa-plus"></i> Nouvelle Conversation
-      </button>
+      {users && userData && (
+        <motion.div
+          initial={{ opacity: 0, y: 100 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 100 }}
+          transition={{ delay: 0.5 }}
+        >
+          <button
+            onClick={openSearchModal}
+            className="btn btn-primary w-full mb-2 mt-5"
+          >
+            <i className="fas fa-plus"></i> Nouvelle Conversation
+          </button>
+        </motion.div>
+      )}
+
       <UserSearchModal searchModalRef={searchModalRef} />
     </div>
   );
