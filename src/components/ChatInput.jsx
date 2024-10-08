@@ -79,8 +79,12 @@ const ChatInput = () => {
           senderId: user.uid,
           recipientId,
           text: message,
-          fileUrl: fileURL, // Ajoutez l'URL du fichier ici
+          fileUrl: fileURL,
           timestamp: serverTimestamp(),
+          conversationId:
+            user.uid > recipientId
+              ? `conversation_${user.uid}-${recipientId}`
+              : `conversation_${recipientId}-${user.uid}`,
         });
 
         const userDocRef = doc(firestore, "users", user.uid);

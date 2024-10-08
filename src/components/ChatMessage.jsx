@@ -36,8 +36,11 @@ const ChatMessage = ({
         {sender}
         <time className="text-xs opacity-50"> {time}</time>
       </div>
-      <>
-        {" "}
+      <div
+        className={`flex items-center group ${
+          !delivered ? "flex-row-reverse gap-3" : ""
+        }`}
+      >
         <div className={`chat-bubble bg-${color} text-white`}>
           {text}
           {image && (
@@ -59,7 +62,7 @@ const ChatMessage = ({
           </button>
         )}
         <div className="w-10 rounded-full"></div>
-      </>
+      </div>
       <div className="chat-footer opacity-50">
         {delivered ? "Delivered" : ""}
       </div>
