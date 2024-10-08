@@ -1,7 +1,5 @@
 import { motion } from "framer-motion";
-import { useRef } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { setRecipient } from "../store/userSlice";
 
 const ConversationItem = ({
@@ -37,9 +35,7 @@ const ConversationItem = ({
       </div>
       <div>
         <a href="#" className="font-semibold">{`${name}`}</a>
-        <div className="text-sm text-gray-500">
-          Dernier message: {lastMessage || "Aucun message"}
-        </div>
+        <div className="text-sm text-gray-500">{lastMessage}</div>
       </div>
     </motion.li>
   );

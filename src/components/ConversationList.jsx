@@ -1,15 +1,49 @@
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { useDispatch, useSelector } from "react-redux";
-import { auth, firestore } from "../firebase/firebase";
+import { useSelector } from "react-redux";
+import { firestore } from "../firebase/firebase";
 import ConversationItem from "./ConversationItem";
 import UserSearchModal from "./UserSearchModal";
 
 const ConversationList = () => {
   const searchModalRef = useRef(null);
   const { currentUser: userData } = useSelector((state) => state.user);
+  const [messages, setMessages] = useState(null);
+
+  const fetchAllMessages = async () => {
+    try {
+      const messagesCollectionRef = collection(firestore, "messages");
+      const messagesDocs = await getDocs(messagesCollectionRef);
+
+      const messages = messagesDocs.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      // Groupe les messages par conversationId et obtenir le dernier message
+      const lastMessageMap = {};
+      messages.forEach((message) => {
+        const { conversationId } = message;
+        if (
+          !lastMessageMap[conversationId] ||
+          message.timestamp > lastMessageMap[conversationId].timestamp
+        ) {
+          lastMessageMap[conversationId] = message; // Met à jour avec le message le plus récent
+        }
+      });
+
+      setMessages(Object.values(lastMessageMap)); // Met à jour avec les derniers messages par conversation
+    } catch (error) {
+      console.error("Erreur lors de la récupération des messages", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllMessages();
+  }, []);
+
+  /* ------------------------------------ x ----------------------------------- */
 
   const fetchAllUsers = async () => {
     const usersCollectionRef = collection(firestore, "users");
@@ -60,19 +94,29 @@ const ConversationList = () => {
   return (
     <div className="flex-grow">
       <ul className="grid gap-4">
-        {friendsProfiles?.map((profile, index) => (
-          <ConversationItem
-            key={index}
-            index={index}
-            name={profile.displayName}
-            recipientId={profile.uid}
-            photoURL={profile.photoURL}
-            lastMessage={"Aucun messages"}
-            initial={profile.initial}
-            online={profile.online || false}
-          />
-        ))}
+        {friendsProfiles?.map((profile, index) => {
+          // Trouve le dernier message pour ce recipientId (ou profile.uid)
+          const lastMessageObj = messages.find(
+            (message) =>
+              message.recipientId === profile.uid ||
+              message.senderId === profile.uid
+          );
+
+          return (
+            <ConversationItem
+              key={index}
+              index={index}
+              name={profile.displayName}
+              recipientId={profile.uid}
+              photoURL={profile.photoURL}
+              lastMessage={lastMessageObj?.text || "Aucun messages"}
+              initial={profile.initial}
+              online={profile.online || false}
+            />
+          );
+        })}
       </ul>
+
       {users && userData && (
         <motion.div
           initial={{ opacity: 0, y: 100 }}
