@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { style } from "framer-motion/client";
 import { useDispatch } from "react-redux";
 import { deleteFromMessage } from "../store/messageSlice";
 
@@ -37,11 +36,9 @@ const ChatMessage = ({
         {sender}
         <time className="text-xs opacity-50"> {time}</time>
       </div>
-      <div className="flex items-center flex-row-reverse group gap-3">
-        <div
-          className={`chat-bubble bg-${color} text-white`}
-          style={delivered ? { marginLeft: -32 } : {}}
-        >
+      <>
+        {" "}
+        <div className={`chat-bubble bg-${color} text-white`}>
           {text}
           {image && (
             <img
@@ -62,8 +59,7 @@ const ChatMessage = ({
           </button>
         )}
         <div className="w-10 rounded-full"></div>
-      </div>
-
+      </>
       <div className="chat-footer opacity-50">
         {delivered ? "Delivered" : ""}
       </div>

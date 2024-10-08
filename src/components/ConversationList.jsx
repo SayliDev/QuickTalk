@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { firestore } from "../firebase/firebase";
 import ConversationItem from "./ConversationItem";
 import UserSearchModal from "./UserSearchModal";
+import { truncate } from "../utils/Utils";
 
 const ConversationList = () => {
   const searchModalRef = useRef(null);
@@ -109,7 +110,9 @@ const ConversationList = () => {
               name={profile.displayName}
               recipientId={profile.uid}
               photoURL={profile.photoURL}
-              lastMessage={lastMessageObj?.text || "Aucun messages"}
+              lastMessage={
+                truncate(lastMessageObj?.text, 30) || "Aucun messages"
+              }
               initial={profile.initial}
               online={profile.online || false}
             />
