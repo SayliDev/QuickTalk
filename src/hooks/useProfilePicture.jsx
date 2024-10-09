@@ -63,7 +63,9 @@ const useProfilePicture = () => {
       );
     } finally {
       setLoading(false);
-      navigate(pagePath);
+      if (pagePath) {
+        navigate(pagePath);
+      }
     }
   };
 
