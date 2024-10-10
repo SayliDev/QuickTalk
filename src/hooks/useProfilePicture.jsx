@@ -5,12 +5,15 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { auth, firestore, storage } from "./../firebase/firebase";
 import { doc, updateDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
+import { fetchUserData } from "../store/userSlice";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 const useProfilePicture = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [user] = useAuthState(auth);
 
   const saveProfilePicture = async (file, setLoading, pagePath) => {
     if (!file) {
@@ -63,6 +66,7 @@ const useProfilePicture = () => {
       );
     } finally {
       setLoading(false);
+      dispatch(fetchUserData(user?.uid));
       if (pagePath) {
         navigate(pagePath);
       }
