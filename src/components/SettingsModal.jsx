@@ -1,14 +1,25 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import AccountSection from "./SettingsModal/AccountSection";
 import { AnimatePresence, motion } from "framer-motion";
 
 const SettingsModal = ({ settingsModalRef }) => {
   const [loading, setLoading] = useState(false);
+
   const closeModal = () => {
     if (settingsModalRef.current) {
       settingsModalRef.current.close();
     }
   };
+
+  // Fonction pour gérer l'enregistrement
+  const handleSaveChanges = () => {
+    // Appel de la fonction de sauvegarde dans le composant AccountSection
+    if (accountSectionRef.current) {
+      accountSectionRef.current.handleSave();
+    }
+  };
+
+  const accountSectionRef = useRef(); // Référence pour le composant AccountSection
   return (
     <dialog ref={settingsModalRef} id="settings_modal" className="modal">
       <div className="modal-box max-w-lg relative">
@@ -26,6 +37,7 @@ const SettingsModal = ({ settingsModalRef }) => {
         <AnimatePresence>
           <h2 className="text-lg font-bold mb-4">Paramètres</h2>
           <AccountSection
+            ref={accountSectionRef}
             settingsModalRef={settingsModalRef}
             loading={loading}
             setLoading={setLoading}
@@ -68,7 +80,7 @@ const SettingsModal = ({ settingsModalRef }) => {
             </div>
           </div>
           <div className="modal-action mt-6">
-            <button className="btn btn-primary">
+            <button onClick={handleSaveChanges} className="btn btn-primary">
               Enregistrer les modifications
             </button>
             <button onClick={closeModal} className="btn">
