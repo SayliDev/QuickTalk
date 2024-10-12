@@ -6,7 +6,7 @@ import { fetchUserData } from "../../store/userSlice";
 import { doc, updateDoc } from "firebase/firestore";
 import useProfilePicture from "../../hooks/useProfilePicture";
 
-const AccountSection = ({ settingsModalRef, setLoading }) => {
+const AccountSection = ({ settingsModalRef, loading, setLoading }) => {
   const [user] = useAuthState(auth);
   const { currentUser: userData } = useSelector((state) => state.user);
   const [name, setName] = useState("");
@@ -37,8 +37,10 @@ const AccountSection = ({ settingsModalRef, setLoading }) => {
     dispatch(fetchUserData(user?.uid));
 
     // ferme la modale
-    if (settingsModalRef.current) {
-      settingsModalRef.current.close();
+    if (!loading && settingsModalRef.current) {
+      setTimeout(() => {
+        settingsModalRef.current.close();
+      }, 800);
     }
   };
 
