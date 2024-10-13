@@ -34,9 +34,12 @@ const SettingsModal = ({ settingsModalRef }) => {
             <span className="loading loading-spinner loading-lg"></span>
           </motion.div>
         )}
-        <AnimatePresence>
-          <h2 className="text-lg font-bold mb-4">Paramètres</h2>
+        <AnimatePresence key="title">
+          <h2 key="title-settings" className="text-lg font-bold mb-4">
+            Paramètres
+          </h2>
           <AccountSection
+            key="account-section"
             ref={accountSectionRef}
             settingsModalRef={settingsModalRef}
             loading={loading}
@@ -44,7 +47,7 @@ const SettingsModal = ({ settingsModalRef }) => {
           />
 
           {/* Section Notifications */}
-          <div className="mb-6">
+          <div key="notifications-section" className="mb-6">
             <h3 className="text-md font-semibold">Notifications</h3>
             <div className="flex items-center justify-between mt-3">
               <span>Messages</span>
@@ -56,26 +59,43 @@ const SettingsModal = ({ settingsModalRef }) => {
             </div>
           </div>
           {/* Section Apparence */}
-          <div>
+          <div key="apparence-section">
             <h3 className="text-md font-semibold">Apparence</h3>
             <div className="grid grid-cols-3 gap-3 mt-4">
               <button className="btn btn-sm bg-neutral-focus text-neutral-content">
                 Thème sombre
               </button>
-              <button className="btn btn-sm bg-accent-focus text-neutral-content">
-                Thème clair
+              <input
+                type="checkbox"
+                value="light"
+                className="btn btn-sm bg-accent-focus text-neutral-content theme-controller"
+                data-theme="light"
+                key="light-theme"
+              />
+
+              <button
+                data-theme="luxury"
+                className="btn btn-sm bg-secondary-focus text-neutral-content"
+              >
+                <p data-theme="luxury">Luxury</p>
               </button>
-              <button className="btn btn-sm bg-secondary-focus text-neutral-content">
-                Thème pastel
+              <button
+                data-theme="sunset"
+                className="btn btn-sm bg-primary-focus text-neutral-content"
+              >
+                <p data-theme="sunset">Sunset</p>
               </button>
-              <button className="btn btn-sm bg-primary-focus text-neutral-content">
-                Thème bleu
+              <button
+                data-theme="cyberpunk"
+                className="btn btn-sm bg-success-focus text-neutral-content"
+              >
+                <p data-theme="cyberpunk">Cyberpunk</p>
               </button>
-              <button className="btn btn-sm bg-success-focus text-neutral-content">
-                Thème vert
-              </button>
-              <button className="btn btn-sm bg-error-focus text-neutral-content">
-                Thème rouge
+              <button
+                data-theme="retro"
+                className="btn btn-sm bg-error-focus text-neutral-content"
+              >
+                <p data-theme="retro">Retro</p>
               </button>
             </div>
           </div>
