@@ -1,9 +1,13 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AccountSection from "./SettingsModal/AccountSection";
 import { AnimatePresence, motion } from "framer-motion";
 
 const SettingsModal = ({ settingsModalRef }) => {
   const [loading, setLoading] = useState(false);
+  const accountSectionRef = useRef(); // Référence pour le composant AccountSection
+  const [isdark, setIsdark] = useState(
+    JSON.parse(localStorage.getItem("isdark"))
+  );
 
   const closeModal = () => {
     if (settingsModalRef.current) {
@@ -19,7 +23,9 @@ const SettingsModal = ({ settingsModalRef }) => {
     }
   };
 
-  const accountSectionRef = useRef(); // Référence pour le composant AccountSection
+  useEffect(() => {
+    localStorage.setItem("isdark", JSON.stringify(isdark));
+  }, [isdark]);
   return (
     <dialog ref={settingsModalRef} id="settings_modal" className="modal">
       <div className="modal-box max-w-lg relative">
@@ -51,53 +57,28 @@ const SettingsModal = ({ settingsModalRef }) => {
             <h3 className="text-md font-semibold">Notifications</h3>
             <div className="flex items-center justify-between mt-3">
               <span>Messages</span>
-              <input type="checkbox" className="toggle toggle-primary" />
+              <input type="radio" className="toggle toggle-primary" />
             </div>
             <div className="flex items-center justify-between mt-3">
               <span>Demandes d&apos;ami</span>
-              <input type="checkbox" className="toggle toggle-primary" />
+              <input type="radio" className="toggle toggle-primary" />
             </div>
           </div>
           {/* Section Apparence */}
           <div key="apparence-section">
             <h3 className="text-md font-semibold">Apparence</h3>
-            <div className="grid grid-cols-3 gap-3 mt-4">
-              <button className="btn btn-sm bg-neutral-focus text-neutral-content">
-                Thème sombre
-              </button>
+            {/* <div className="grid grid-cols-3 gap-3 mt-4"> */}
+            <div className="flex items-center justify-between mt-5">
+              <span>Mode sombre</span>
               <input
                 type="checkbox"
-                value="light"
-                className="btn btn-sm bg-accent-focus text-neutral-content theme-controller"
-                data-theme="light"
-                key="light-theme"
+                onChange={() => setIsdark(!isdark)}
+                checked={isdark}
+                value="dark"
+                className="toggle theme-controller"
               />
-
-              <button
-                data-theme="luxury"
-                className="btn btn-sm bg-secondary-focus text-neutral-content"
-              >
-                <p data-theme="luxury">Luxury</p>
-              </button>
-              <button
-                data-theme="sunset"
-                className="btn btn-sm bg-primary-focus text-neutral-content"
-              >
-                <p data-theme="sunset">Sunset</p>
-              </button>
-              <button
-                data-theme="cyberpunk"
-                className="btn btn-sm bg-success-focus text-neutral-content"
-              >
-                <p data-theme="cyberpunk">Cyberpunk</p>
-              </button>
-              <button
-                data-theme="retro"
-                className="btn btn-sm bg-error-focus text-neutral-content"
-              >
-                <p data-theme="retro">Retro</p>
-              </button>
             </div>
+            {/* </div> */}
           </div>
           <div className="modal-action mt-6">
             <button onClick={handleSaveChanges} className="btn btn-primary">
