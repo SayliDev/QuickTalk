@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllUsers, fetchUserData, sendRequest } from "../store/userSlice";
 import { AnimatePresence, motion } from "framer-motion";
@@ -10,6 +10,7 @@ const UserSearchModal = ({ searchModalRef }) => {
   const dispatch = useDispatch();
   const [user] = useAuthState(auth);
   const userUid = user?.uid;
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { currentUser: userData, error } = useSelector((state) => state.user);
 
@@ -37,6 +38,14 @@ const UserSearchModal = ({ searchModalRef }) => {
     dispatch(sendRequest({ userId: recipientId, recipientId: user.uid }));
   };
 
+  /* ------------------------------- Search User ------------------------------ */
+
+  const filterUsers = users.filter((user) => {
+    return user.displayName
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase().trim());
+  });
+
   /* ------------------------------------ x ----------------------------------- */
 
   return (
@@ -50,13 +59,16 @@ const UserSearchModal = ({ searchModalRef }) => {
           {/* Champ de recherche */}
           <input
             type="text"
+            name="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Rechercher un utilisateur..."
             className="input input-bordered w-full mb-4"
           />
           {/* Liste d'utilisateurs */}
           {users && user && users.length > 0 ? (
             <ul className="max-h-60 overflow-y-auto">
-              {users
+              {filterUsers
                 .filter((currentUser) => currentUser.id !== user.uid)
                 .map((user, index) => (
                   <li
@@ -79,25 +91,25 @@ const UserSearchModal = ({ searchModalRef }) => {
                     <button
                       onClick={() => handleSendRequest(user.id)}
                       className={`btn btn-outline btn-sm ${
-                        user.pendingRequests.includes(userUid)
+                        user.pendingRequests?.includes(userUid)
                           ? "btn-warning btn-sm cursor-not-allowed"
                           : ""
                       }`}
                       disabled={
-                        user.pendingRequests.includes(userUid) ||
+                        user.pendingRequests?.includes(userUid) ||
                         userData?.friends.includes(user.id)
                       }
                     >
                       <i
                         className={`fas  ${
-                          user.pendingRequests.includes(userUid)
+                          user.pendingRequests?.includes(userUid)
                             ? "fa-clock"
                             : userData?.friends.includes(user.id)
                             ? "fa-check"
                             : "fa-user-plus"
                         }`}
                       />
-                      {user.pendingRequests.includes(userUid)
+                      {user.pendingRequests?.includes(userUid)
                         ? "En attente"
                         : userData?.friends.includes(user.id)
                         ? "Amis"
@@ -105,6 +117,18 @@ const UserSearchModal = ({ searchModalRef }) => {
                     </button>
                   </li>
                 ))}
+              {filterUsers.length === 0 && (
+                <div className="text-center mt-4">
+                  {/* <p className="text-center text-gray-500 m-5">
+                    Aucun utilisateur correspondant
+                  </p> */}
+                  <img
+                    className="mx-auto w-36 filter invert opacity-10"
+                    src="https://cdn-icons-png.flaticon.com/512/6134/6134116.png"
+                    alt="No result"
+                  />
+                </div>
+              )}
             </ul>
           ) : (
             <motion.div
