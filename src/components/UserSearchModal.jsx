@@ -1,9 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllUsers, fetchUserData, sendRequest } from "../store/userSlice";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebase/firebase";
+import Fuse from "fuse.js";
+
+const fuseOptions = {
+  keys: ["displayName"],
+};
 
 const UserSearchModal = ({ searchModalRef }) => {
   const { allUsers: users } = useSelector((state) => state.user);
@@ -40,11 +45,17 @@ const UserSearchModal = ({ searchModalRef }) => {
 
   /* ------------------------------- Search User ------------------------------ */
 
-  const filterUsers = users.filter((user) => {
-    return user.displayName
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase().trim());
-  });
+  const fuse = useMemo(() => new Fuse(users, fuseOptions), [users]);
+
+  const [filterUsers, setFilterUsers] = useState([]);
+
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilterUsers(users);
+    } else {
+      setFilterUsers(fuse.search(searchQuery).map((result) => result.item));
+    }
+  }, [searchQuery, users, fuse]);
 
   /* ------------------------------------ x ----------------------------------- */
 

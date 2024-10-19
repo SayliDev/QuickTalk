@@ -1,7 +1,7 @@
 {
   "name": "quicktalk",
   "private": true,
-  "version": "0.7.2",
+  "version": "0.7.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,6 +13,7 @@
     "@reduxjs/toolkit": "^2.2.7",
     "firebase": "^10.13.2",
     "framer-motion": "^11.5.6",
+    "fuse.js": "^7.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-firebase-hooks": "^5.1.1",
